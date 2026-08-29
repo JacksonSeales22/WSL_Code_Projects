@@ -8,6 +8,7 @@
 #include <cmath>
 
 #define WAIT_TIME 700 //Time between blocks moving
+#define MOVE_REPEAT_TIME 125 //ms between repeated moves while a key is held
 #define POINTS_PER_ROW 100 //Default score for the number of points awarded per row removed
 #define SCORE_MULTIPLIER 1.5 //Multiplier to score for each row removed in a single turn.
 
@@ -47,6 +48,7 @@ class Game
         Display *display;
 
         void draw_piece(int xPos, int yPos, int piece, int rotation);
+        void draw_grid();
         void draw_board();
         void draw_score();
 };
@@ -82,6 +84,21 @@ void Game::add_score(int linesCleared)
 //Returns the block color of the current piece
 color Game::get_color(){return blockColor;}
 
+//Draws a simple grid around each block on the board to highlight pathing for the pieces
+void Game::draw_grid()
+{
+    int pX1 = BOARD_POSITION - (BLOCK_SIZE * (BOARD_WIDTH / 2));
+    int pY  = screenHeight - (BLOCK_SIZE * BOARD_HEIGHT);
+
+    //Drawing vertical grid lines, one per column
+    for (int i = 0; i <= BOARD_WIDTH; i++)
+        display->draw_block(pX1 + i * BLOCK_SIZE, pY, 1, BLOCK_SIZE * BOARD_HEIGHT, GRAY);
+
+    //Drawing horizontal grid lines, one per row
+    for (int j = 0; j <= BOARD_HEIGHT; j++)
+        display->draw_block(pX1, pY + j * BLOCK_SIZE, BLOCK_SIZE * BOARD_WIDTH, 1, GRAY);
+}
+
 //Iterates through the given dimensions of a gameboard, (BOARD_WIDTH and BOARD_HEIGHT from board.h)
 //Steps:
     // - Determines variables for board positioning
@@ -89,6 +106,8 @@ color Game::get_color(){return blockColor;}
     // - Checks each space on the board, if the space is not free draws a block.
 void Game::draw_board()
 {
+    draw_grid();
+
     int pX1 = BOARD_POSITION - (BLOCK_SIZE * (BOARD_WIDTH / 2)) - 1;
     int pX2 = BOARD_POSITION + (BLOCK_SIZE * (BOARD_WIDTH / 2));
     int pY  = screenHeight - (BLOCK_SIZE * BOARD_HEIGHT);
@@ -122,7 +141,7 @@ void Game::create_new_piece()
     //Random next piece
     nextPiece = rand () % (6 - 0 + 1) + 0;
     nextRotation = rand () % (3 - 0 + 1) + 0;
-    nextBlockColor = static_cast<color>(rand() % (COLOR_MAX - 1) + 1);
+    nextBlockColor = static_cast<color>(rand() % (COLOR_MAX - 4) + 2);
 }
 
 //Similar to create_new_piece(), generates the first and second piece, seeding the random function first.
@@ -136,14 +155,14 @@ void Game::start_game()
     rotation = rand () % (3 - 0 + 1) + 0;
     xPos = pieces->get_x_initial_pos (piece, rotation);
     yPos = pieces->get_y_initial_pos (piece, rotation);
-    blockColor = static_cast<color>(rand() % (COLOR_MAX - 1) + 1);
+    blockColor = static_cast<color>(rand() % (COLOR_MAX - 4) + 2);
 
     // Next piece
     nextPiece = rand () % (6 - 0 + 1) + 0;
     nextRotation = rand () % (3 - 0 + 1) + 0;
     nextXPos = BOARD_WIDTH + 5;
     nextYPos = 5;
-    nextBlockColor = static_cast<color>(rand() % (COLOR_MAX - 1) + 1);
+    nextBlockColor = static_cast<color>(rand() % (COLOR_MAX - 4) + 2);
 }
 
 //Draws the current piece being played by sending all indexes of blocks that the piece is occupying to draw_block

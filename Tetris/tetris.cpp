@@ -283,6 +283,7 @@ int main()
     Game game(&gameBoard, &pieces, &display, screenHeight);
 
     unsigned long gameTime1 = SDL_GetTicks();
+    unsigned long moveTime1 = SDL_GetTicks();
 
     display.init_window();
 
@@ -299,26 +300,26 @@ int main()
 
         switch (key)
         {
-        case (SDLK_RIGHT):
-        {
-            if (gameBoard.movement_possible (game.xPos + 1, game.yPos, game.piece, game.rotation))
-            game.xPos++;
-            break;
-        }
+        // case (SDLK_RIGHT):
+        // {
+        //     if (gameBoard.movement_possible (game.xPos + 1, game.yPos, game.piece, game.rotation))
+        //     game.xPos++;
+        //     break;
+        // }
 
-        case (SDLK_LEFT):
-        {
-            if (gameBoard.movement_possible (game.xPos - 1, game.yPos, game.piece, game.rotation))
-            game.xPos--;
-            break;
-        }
+        // case (SDLK_LEFT):
+        // {
+        //     if (gameBoard.movement_possible (game.xPos - 1, game.yPos, game.piece, game.rotation))
+        //     game.xPos--;
+        //     break;
+        // }
 
-        case (SDLK_DOWN):
-        {
-            if (gameBoard.movement_possible (game.xPos, game.yPos + 1, game.piece, game.rotation))
-            game.yPos++;
-            break;
-        }
+        // case (SDLK_DOWN):
+        // {
+        //     if (gameBoard.movement_possible (game.xPos, game.yPos + 1, game.piece, game.rotation))
+        //     game.yPos++;
+        //     break;
+        // }
         
         case (SDLK_x):
         {
@@ -351,6 +352,24 @@ int main()
 
             break;
         }
+        }
+
+        unsigned long moveTime2 = SDL_GetTicks();
+        if ((moveTime2 - moveTime1) > MOVE_REPEAT_TIME)
+        {
+            if (display.key_press(SDLK_LEFT) &&
+                gameBoard.movement_possible(game.xPos - 1, game.yPos, game.piece, game.rotation))
+                game.xPos--;
+
+            if (display.key_press(SDLK_RIGHT) &&
+                gameBoard.movement_possible(game.xPos + 1, game.yPos, game.piece, game.rotation))
+                game.xPos++;
+
+            if (display.key_press(SDLK_DOWN) &&
+                gameBoard.movement_possible(game.xPos, game.yPos + 1, game.piece, game.rotation))
+                game.yPos++;
+
+            moveTime1 = SDL_GetTicks();
         }
 
         unsigned long gameTime2 = SDL_GetTicks();

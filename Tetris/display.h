@@ -5,9 +5,9 @@
 #include <SDL2/SDL_ttf.h>
 #include <string>
 
-#define COLOR_MAX 10 //Maximum number of colors
+#define COLOR_MAX 12 //Maximum number of colors
 
-enum color {FREE, WHITE, ORANGE, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW, BABY_PINK, BLACK};
+enum color {FREE, WHITE, ORANGE, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW, PINK, BLACK, GRAY};
 
 class Display
 {
@@ -53,15 +53,17 @@ class Display
 //Initializes all SDL classes required to 'draw' the boardstate
 int Display::init_window()
 {
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1"); //DPI means PPI (Pixels per inch), setting to one will allow scaling
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
         return -1;
 
     window = SDL_CreateWindow("Tetris",
                                 SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                screenWidth, screenHeight, 0);
+                                screenWidth, screenHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (!window) return -1;
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_RenderSetLogicalSize(renderer, screenWidth, screenHeight); //Sets a set size for the renderer, scaling the screen simply 'zooms' on this set size. (Fixed virtual resolution)
     if (!renderer) return -1;
 
     keyState = SDL_GetKeyboardState(nullptr);
@@ -88,17 +90,18 @@ static void setColor(SDL_Renderer* r, color c)
 {
     switch (c)
     {
-        case RED:     SDL_SetRenderDrawColor(r, 255,   0,   0, 255); break;
-        case GREEN:   SDL_SetRenderDrawColor(r,   0, 255,   0, 255); break;
-        case BLUE:    SDL_SetRenderDrawColor(r,   0,   0, 255, 255); break;
-        case YELLOW:  SDL_SetRenderDrawColor(r, 255, 255,   0, 255); break;
-        case ORANGE:  SDL_SetRenderDrawColor(r, 255, 165, 0, 0); break;
-        case CYAN:    SDL_SetRenderDrawColor(r,   0, 255, 255, 255); break;
-        case MAGENTA: SDL_SetRenderDrawColor(r, 255,   0, 255, 255); break;
-        case BABY_PINK: SDL_SetRenderDrawColor(r, 244, 194, 194, 255); break;
+        case RED:       SDL_SetRenderDrawColor(r, 255, 0, 0, 255); break;
+        case GREEN:     SDL_SetRenderDrawColor(r, 0, 255, 0, 255); break;
+        case BLUE:      SDL_SetRenderDrawColor(r, 0, 0, 255, 255); break;
+        case YELLOW:    SDL_SetRenderDrawColor(r, 255, 255, 0, 255); break;
+        case ORANGE:    SDL_SetRenderDrawColor(r, 255, 165, 0, 0); break;
+        case CYAN:      SDL_SetRenderDrawColor(r, 0, 255, 255, 255); break;
+        case MAGENTA:   SDL_SetRenderDrawColor(r, 255, 0, 255, 255); break;
+        case PINK:      SDL_SetRenderDrawColor(r, 252, 108, 133, 255); break;
         case BLACK:     SDL_SetRenderDrawColor(r, 0, 0, 0, 255); break;
-        case WHITE:     SDL_SetRenderDrawColor(r, 255, 255, 255, 255);break;
-        default:            SDL_SetRenderDrawColor(r, 255, 255, 255, 255); break;
+        case WHITE:     SDL_SetRenderDrawColor(r, 255, 255, 255, 255); break;
+        case GRAY:      SDL_SetRenderDrawColor(r, 175, 175, 175, 200); break;
+        default:        SDL_SetRenderDrawColor(r, 255, 255, 255, 255); break;
     }
 }
 
