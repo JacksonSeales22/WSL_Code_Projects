@@ -14,6 +14,8 @@ The arrays are in the following order:
 #include <cstring>
 #include "display.h"
 
+#define PIECE_WIDTH 5 //Dimensions of the piece array containing block information
+
 class Pieces
 {
     public: 

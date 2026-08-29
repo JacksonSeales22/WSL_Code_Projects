@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -g $(shell pkg-config --cflags sdl2)
-LDFLAGS = $(shell pkg-config --libs sdl2)
+LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_ttf)
 TARGET = tetris
 
 tetris: tetris.cpp board.h pieces.h gameplay.h display.h

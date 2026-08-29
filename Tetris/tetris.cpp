@@ -16,6 +16,21 @@ Variable name and commenting conventions:
 
 int main()
 {
+    // FILE *fptr;
+
+    // char fileName = "scores.txt";
+    // fptr = fopen(fileName, "w");
+    // char highScore[12] = "Unavailable"; //Scores are stored as integers, since max int value is 2,147,483,647 size is at least 11.
+
+    // if (fptr == NULL)
+    // {
+    //     fclose(fptr);
+    // }
+    // else
+    // {
+    //     fscanf(fptr, "%s", &highScore);
+    // }
+
     int pieceData[7][4][5][5] ={{
         {//O-piece
             {0,0,0,0,0},
@@ -275,6 +290,7 @@ int main()
         
     while (!display.key_press(SDLK_ESCAPE))
     {
+        int linesCleared = 0;
         display.clear_screen(); // Clear screen
         game.draw_game(); // Draw staff
         display.update_screen (); // Put the graphic context in the screen
@@ -312,9 +328,10 @@ int main()
                 game.yPos++;
             }
 
-            gameBoard.update_board(game.xPos, game.yPos - 1, game.piece, game.rotation);
+            gameBoard.update_board(game.xPos, game.yPos - 1, game.piece, game.rotation, game.get_color());
 
-            gameBoard.delete_lines ();
+            linesCleared = gameBoard.delete_lines();
+            game.add_score(linesCleared);
 
             if (gameBoard.game_over())
             {
@@ -346,9 +363,10 @@ int main()
             }
             else
             {
-                gameBoard.update_board(game.xPos, game.yPos, game.piece, game.rotation);
+                gameBoard.update_board(game.xPos, game.yPos, game.piece, game.rotation, game.get_color());
 
-                gameBoard.delete_lines();
+                linesCleared = gameBoard.delete_lines();
+                game.add_score(linesCleared);
 
                 if (gameBoard.game_over())
                 {

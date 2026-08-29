@@ -19,9 +19,10 @@ class Board
     int get_y_pix_pos (int yPos);
     bool is_space_free (int xPos, int yPos);
     bool movement_possible (int xPos, int yPos, int piece, int rotation);
-    void update_board (int xPos, int yPos, int piece, int rotation);
-    void delete_lines();
+    void update_board (int xPos, int yPos, int piece, int rotation, color blockColor);
+    int delete_lines();
     bool game_over();
+    int get_content(int xPos, int yPos);
 
     Board(Pieces *livePieces, int inScreenHeight)
     : screenHeight(inScreenHeight), gamePieces(livePieces)
@@ -30,7 +31,6 @@ class Board
     }
 
     private:
-    enum {FREE, FILLED}; //States of board squares (FREE == 0, FILLED == 1)
     int gameBoard[BOARD_WIDTH][BOARD_HEIGHT]; //Actual game board, [x][y] where y=0 is the top of the board
     int screenHeight;
     Pieces *gamePieces;
@@ -38,6 +38,11 @@ class Board
     void initialize_board();
     void delete_line(int row);
 };
+
+int Board::get_content(int xPos, int yPos)
+{
+    return gameBoard[xPos][yPos];
+}
 
 /*
 Returns an integer value of a given block's x coordinate in pixels.
@@ -72,7 +77,7 @@ Output:
 */
 bool Board::is_space_free (int xPos, int yPos)
 {
-    if (gameBoard[xPos][yPos] == 0)
+    if (gameBoard[xPos][yPos] == FREE)
     {
         return true;
     }
@@ -137,7 +142,13 @@ void Board::initialize_board()
 }
 
 //Once a piece has been placed, updates the board to reflect the newly filled squares
-void Board::update_board(int xPos, int yPos, int piece, int rotation)
+// Parameters:
+//     - int xPos: The x coordinate of the piece placed into the board
+//     - int yPos: The y coordinate of the piece placed into the board
+//     - int piece: A value representing the particular shape of the piece
+//     - int rotation: A value representing the final rotation of the piece to orient the block locations
+//     - color blockColor: An enum value corresponding to a color in display.h
+void Board::update_board(int xPos, int yPos, int piece, int rotation, color blockColor)
 {
     for (int i = 0; i < 5; i++)
     {
@@ -147,11 +158,12 @@ void Board::update_board(int xPos, int yPos, int piece, int rotation)
             if (blockType == 0)
                 continue;
 
+            //
             int boardX = xPos + (j - 2);
             int boardY = yPos + (i - 2);
 
             if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT)
-                gameBoard[boardX][boardY] = FILLED;
+                gameBoard[boardX][boardY] = blockColor;
         }
     }
 }
@@ -162,29 +174,40 @@ bool Board::game_over()
 {
     for (int i = 0; i < BOARD_WIDTH; i++)
     {
-        if (gameBoard[i][0] == FILLED) return true;
+        if (gameBoard[i][0] != FREE) return true;
     }
     return false;
 }
 
-//Check the gameboard for full lines - Calls delete_line to remove it if one is found.
-void Board::delete_lines()
+//Check the gameboard for fully occupied lines - Calls delete_line to remove it if one is found.
+//Outputs:
+//  - An integer value for the number of lines removed
+int Board::delete_lines()
 {
+    int linesCleared = 0;
     for (int i = 0; i < BOARD_HEIGHT; i++)
     {
         bool full = true;
         for (int j = 0; j < BOARD_WIDTH; j++)
         {
-            if (gameBoard[j][i] == FREE) { full = false; break; }
+            if (gameBoard[j][i] == FREE)
+            {
+                full = false;
+                break;
+            }
         }
-        if (full) delete_line(i);
+        if (full)
+        {
+            delete_line(i);
+            linesCleared++;
+        }
     }
+    return linesCleared;
 }
 
 //Removes a full row consumed by pieces, then updates the gameboard to move all pieces above the removed row down.
 // Parameters:
 //  - int row: The row to be removed, determined by delete_lines()
-
 void Board::delete_line(int row)
 {
     for (int x = 0; x < BOARD_WIDTH; x++)
