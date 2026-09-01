@@ -16,20 +16,21 @@ Variable name and commenting conventions:
 
 int main()
 {
-    // FILE *fptr;
+    FILE *fptr;
 
-    // char fileName = "scores.txt";
-    // fptr = fopen(fileName, "w");
-    // char highScore[12] = "Unavailable"; //Scores are stored as integers, since max int value is 2,147,483,647 size is at least 11.
+    char fileName[11] = "scores.txt";
+    fptr = fopen(fileName, "w");
+    //char highScore[12] = "Unavailable"; //Scores are stored as integers, since max int value is 2,147,483,647 size is at least 11.
+    int highScore = 0;
 
-    // if (fptr == NULL)
-    // {
-    //     fclose(fptr);
-    // }
-    // else
-    // {
-    //     fscanf(fptr, "%s", &highScore);
-    // }
+    if (fptr == NULL)
+    {
+        fclose(fptr);
+    }
+    else
+    {
+        fscanf(fptr, "%d", &highScore);
+    }
 
     int pieceData[7][4][5][5] ={{
         {//O-piece
@@ -284,6 +285,7 @@ int main()
 
     unsigned long gameTime1 = SDL_GetTicks();
     unsigned long moveTime1 = SDL_GetTicks();
+    int piecesSinceSpeedup = 0;
 
     display.init_window();
 
@@ -299,28 +301,7 @@ int main()
         int key = display.poll_key();
 
         switch (key)
-        {
-        // case (SDLK_RIGHT):
-        // {
-        //     if (gameBoard.movement_possible (game.xPos + 1, game.yPos, game.piece, game.rotation))
-        //     game.xPos++;
-        //     break;
-        // }
-
-        // case (SDLK_LEFT):
-        // {
-        //     if (gameBoard.movement_possible (game.xPos - 1, game.yPos, game.piece, game.rotation))
-        //     game.xPos--;
-        //     break;
-        // }
-
-        // case (SDLK_DOWN):
-        // {
-        //     if (gameBoard.movement_possible (game.xPos, game.yPos + 1, game.piece, game.rotation))
-        //     game.yPos++;
-        //     break;
-        // }
-        
+        {        
         case (SDLK_x):
         {
             // Check collision from up to down
@@ -341,6 +322,7 @@ int main()
             }
 
             game.create_new_piece();
+            piecesSinceSpeedup++;
 
             break;
         }
@@ -374,8 +356,22 @@ int main()
 
         unsigned long gameTime2 = SDL_GetTicks();
 
-        if ((gameTime2 - gameTime1) > WAIT_TIME)
+        if (game.currentSpeedup < MAX_SPEEDUP && piecesSinceSpeedup >= TT_SPEEDUP)
         {
+            if (game.piecesPlaced % (TT_SPEEDUP * MAX_SPEEDUP) == 0)
+            {
+                game.currentSpeedup = MAX_SPEEDUP;
+            }
+            else
+            {
+                game.currentSpeedup += SPEEDUP;
+                //std::cout << "Current Speedup: " << game.currentSpeedup;
+            }
+        }
+
+        if ((gameTime2 - gameTime1) > (INITIAL_WAIT_TIME - game.currentSpeedup))
+        {
+            //std::cout << "Current Wait: " << (INITIAL_WAIT_TIME - game.currentSpeedup);
             if (gameBoard.movement_possible (game.xPos, game.yPos + 1, game.piece, game.rotation))
             {
                 game.yPos++;
@@ -394,10 +390,20 @@ int main()
                 }
 
                 game.create_new_piece();
+                piecesSinceSpeedup++;
             }
 
             gameTime1 = SDL_GetTicks();
         }
+    }
+
+    if (fptr != NULL)
+    {
+        if (game.get_score() > highScore)
+        {
+            //Write to file with new high score
+        }
+        fclose(fptr);
     }
 
     return 0;

@@ -7,8 +7,11 @@
 #include <time.h>
 #include <cmath>
 
-#define WAIT_TIME 700 //Time between blocks moving
-#define MOVE_REPEAT_TIME 125 //ms between repeated moves while a key is held
+#define INITIAL_WAIT_TIME 700 //Time between blocks moving
+#define TT_SPEEDUP 10 //Number of pieces placed until game speeds up
+#define SPEEDUP 50 //Number of miliseconds shaved off the initial wait time between block movements
+#define MAX_SPEEDUP 10 //Maximum number of times a speedup can be applied
+#define MOVE_REPEAT_TIME 120 //ms between repeated moves while a key is held
 #define POINTS_PER_ROW 100 //Default score for the number of points awarded per row removed
 #define SCORE_MULTIPLIER 1.5 //Multiplier to score for each row removed in a single turn.
 
@@ -33,7 +36,8 @@ class Game
         //Information about falling piece
         int xPos, yPos;
         int piece, rotation;
-
+        int piecesPlaced = 0;
+        unsigned int currentSpeedup = 0;
 
     private:
         int screenHeight;
@@ -131,6 +135,8 @@ void Game::draw_board()
 //Generates a new piece to be played as well as the next piece to be played.
 void Game::create_new_piece()
 {
+    //Increase number of pieces placed.
+    piecesPlaced++;
     //Creating a new piece
     piece = nextPiece;
     rotation = nextRotation;
